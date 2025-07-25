@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Архив
+{% endblock %}
+
+{% block header %}
+<h1>Архив</h1>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    {% for photo in stored_photos %}
+        <div class="photo-block">
+            <p>{{ photo.name }}</p>
+            <a href="{{ url_for('photo_view', photo_id=photo.id) }}">
+                <img src="{{ url_for('photo_data', photo_id=photo.id) }}" alt="{{ photo.name }}" width="300">
+            </a>
+            <p><em>Автор: {{ photo.author }}</em></p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

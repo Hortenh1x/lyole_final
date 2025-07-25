@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Добавление записи
+{% endblock %}
+
+{% block header %}
+<h1>Добавление записи</h1>
+{% endblock %}
+
+{% block content %}
+<form method="post" class="form-control">
+    <input type="text" name="title" placeholder="Заголовок" class="form-control"><br>
+    <input type="text" name="text" placeholder="Текст письма" class="form-control"><br>
+    <button class ="btn btn-success" type="submit">Добавить</button>
+    <a href="{{ url_for('stored_letters') }}" class="nav-link px-2 link-dark">Сохраненные письма</a>
+</form>
+
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="flashToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Уведомление</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/bootstrap-toast.js') }}"></script>
+<script src="{{ url_for('static', filename='js/letters.js') }}"></script>
+<script>
+  // Передаем flash сообщения в JavaScript
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      const flashMessages = [
+        {% for message in messages %}
+          "{{ message|safe }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+      showFlashMessages(flashMessages);
+    {% endif %}
+  {% endwith %}
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block header %}{% endblock %}  <!-- Пустой блок - header не будет отображаться -->
+{% block footer %}{% endblock %}  <!-- Пустой блок - footer не будет отображаться -->
+
+{% block title %}Mood{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mood.css') }}">
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="card-container">
+        <button class="btn btn-new" id="complimentBtn">
+            <span class="btn-icon">💗</span>
+        </button>
+
+        <div id="card" class="card hidden">
+            <p id="complimentText" class="compliment-text"></p>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+    <script type="module" src="{{ url_for('static', filename='js/mood.js') }}"></script>
+{% endblock %}

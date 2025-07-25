@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ photo.name }}{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mood.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="text-align: center;">
+    <h1>{{ photo.name }}</h1>
+    <div class="photo-container" style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+        <img src="{{ url_for('photo_data', photo_id=photo.id) }}" alt="{{ photo.name }}" style="width: auto; max-height: 100%;">
+    </div>    
+
+    {% if photo.desc %}
+        <p style="font-size: 1.2em;">{{ photo.desc }}</p>
+    {% else %}
+        <p><em>Без описания</em></p>
+    {% endif %}
+
+    <p><em>Автор: {{ photo.author }}</em></p>
+    <a href="{{ url_for('stored_photos') }}">← Назад к архиву</a>
+</div>
+{% endblock %}

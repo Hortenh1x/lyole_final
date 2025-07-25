@@ -1,0 +1,14 @@
+{
+  "name": "flask-toast-notifications",
+  "version": "1.0.0",
+  "description": "TypeScript toast notifications for Flask app",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf static/js/*.js static/js/*.map static/js/*.d.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "private": true
+}
