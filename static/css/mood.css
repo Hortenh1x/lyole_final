@@ -42,7 +42,7 @@ html, body {
     font-size: 40px;
     font-weight: bold;
     border-radius: 12px;
-    border: none;
+    border: 3px solid #76172C;
     display: flex;
     justify-content: center;
     text-align: center;
@@ -51,7 +51,7 @@ html, body {
 
 .btn-new:hover {
     transform: translate(0,-3px);
-    box-shadow: 0 20px 40px 0 rgba(255, 182, 193, 1);
+    box-shadow: var(--shadow);
     background-color: var(--secondary-color);
 }
 
@@ -90,7 +90,7 @@ html, body {
 .card.show {
     opacity: 1;
     visibility: visible;
-    top: 0px;
+    top: -20px;
     display: block;
 }
 
