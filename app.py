@@ -1,5 +1,5 @@
-from flask import Flask, render_template, jsonify, request, redirect, flash
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, jsonify, request, redirect, flash, g, url_for
+import sqlite3
 import random
 import json
 import os
@@ -9,23 +9,51 @@ from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = 'key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lyole.db'
-db = SQLAlchemy(app)
 
+DB_DIR = os.path.join(os.path.dirname(__file__), 'instance')
+os.makedirs(DB_DIR, exist_ok=True)
+DB_PATH = os.path.join(DB_DIR, 'lyole.db')
 
-class Letter(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(300), nullable=True)
-    text = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(50), nullable=False)
+def get_db():
+    if 'db' not in g:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        g.db = conn
+    return g.db
 
+@app.teardown_appcontext
+def close_db(exc):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
-class Photo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(300), nullable=True)
-    img_data = db.Column(db.BLOB, nullable=False)
-    author = db.Column(db.String(50), nullable=False)
-    desc = db.Column(db.Text, nullable=True)
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS letters (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                text TEXT NOT NULL,
+                author TEXT NOT NULL
+        )
+    ''')
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS photos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                img_data BLOB NOT NULL,
+                author TEXT NOT NULL,
+                desc TEXT
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+init_db()
 
 
 with open("compliments.json", encoding="utf-8") as f:
@@ -44,8 +72,11 @@ def index():
 
 @app.route("/letters/stored")
 def stored_letters():
-    stored_letters = Letter.query.all()
-    return render_template('stored_letters.html', stored_letters=stored_letters)
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, title, text, author FROM letters ORDER BY id DESC"
+        ).fetchall()
+    return render_template('stored_letters.html', stored_letters=rows)
 
 
 @app.route("/letters", methods=['POST', 'GET'])
@@ -55,16 +86,20 @@ def letters():
         text = request.form.get('text')
         
         if text:
+            db = get_db()
             try:
-                new_letter = Letter(title=title, text=text, author='Anonymous')
-                #позже получим автора из сессии
-                db.session.add(new_letter)
-                db.session.commit()
+                db.execute(
+                    "INSERT INTO letters (title, text, author) VALUES (?, ?, ?)",
+                    (title, text, 'Anonymous')  #позже получим автора из сессии
+                )
+                db.commit()
                 flash('Успешно отправлено')
                     
             except Exception as e:
-                db.session.rollback()
-                db.session.close()
+                try:
+                    db.rollback()
+                except Exception:
+                    pass
                 flash('Ошибка при сохранении в базу данных')
                 print(f"Ошибка базы данных: {e}")
         else:
@@ -81,50 +116,78 @@ def photos():
         file = request.files.get('img_data')
         desc = request.form.get('desc')
         
-        if file and file.filename:
-            img_data = file.read()
-            try:
-                image = Image.open(BytesIO(img_data))
-                image.verify()
-                name = file.filename
-                new_photo = Photo(name=name, img_data=img_data, author='Anonymous', desc=desc)
-                #позже получим автора из сессии
-                db.session.add(new_photo)
-                db.session.commit()
-                flash('Успешно отправлено')
+        if not (file and file.filename):
+            flash('выбери файл')
+            return redirect('/photos')
 
-            except (IOError, SyntaxError) as img_err:
-                flash('Загруженный файл не является изображением')
-                print(f"Ошибка валидации изображения: {img_err}")
-                    
-            except Exception as e:
-                db.session.rollback()
-                db.session.close()
-                flash('Ошибка при сохранении в базу данных')
-                print(f"Ошибка базы данных: {e}")
-        else:
-            flash('Выбери файл')
+        
+        img_data = file.read()
+        try:
+            Image.open(BytesIO(img_data)).verify()
+        except Exception as img_err:
+            flash('это не картинка')
+            print(f"Ошибка обработки изображения: {img_err}")
+            return redirect('/photos')
+        
+        name = file.filename
+        db = get_db()
+        try:
+            db.execute(
+                "INSERT INTO photos (name, img_data, author, desc) VALUES (?, ?, ?, ?)",
+                (name, sqlite3.Binary(img_data), 'Anonymous', desc)  #позже получим автора из сессии
+            )
+            db.commit()
+            flash('Успешно отправлено')
+        except Exception as e:
+            try:
+                db.rollback()
+            except Exception:
+                pass
+            flash('Ошибка при сохранении в базу данных')
+            print(f"Ошибка базы данных: {e}")
         
         return redirect('/photos')
-    else:
-        return render_template('photos.html')
+    
+    return render_template('photos.html')
     
 
 @app.route("/photos/stored")
 def stored_photos():
-    stored_photos = Photo.query.all()
-    return render_template('stored_photos.html', stored_photos=stored_photos)
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, name, author, desc FROM photos ORDER BY id DESC"
+    ).fetchall()
+    return render_template('stored_photos.html', stored_photos=rows)
+
 
 @app.route('/photos/<int:photo_id>')
 def photo_data(photo_id):
-    photo = Photo.query.get_or_404(photo_id)
-    mime_type = guess_type(photo.name)[0] or 'application/octet-stream'
-    return app.response_class(photo.img_data, mimetype=mime_type)
+    db = get_db()
+    row = db.execute(
+        "SELECT img_data, name FROM photos WHERE id = ?",
+        (photo_id,)
+    ).fetchone()
+
+    if row is None:
+        from flask import abort
+        abort(404)
+
+    mime_type = guess_type(row['name'])[0] or 'application/octet-stream'
+    return app.response_class(row['img_data'], mimetype=mime_type)
 
 @app.route('/photo/view/<int:photo_id>')
 def photo_view(photo_id):
-    photo = Photo.query.get_or_404(photo_id)
-    return render_template('photo_view.html', photo=photo)
+    db = get_db()
+    row = db.execute(
+        "SELECT id, name, author, desc FROM photos WHERE id = ?",
+        (photo_id,)
+    ).fetchone()
+
+    if row is None:
+        from flask import abort
+        abort(404)
+
+    return render_template('photo_view.html', photo=row)
 
 @app.route("/mood")
 def mood():
