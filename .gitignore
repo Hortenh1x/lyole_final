@@ -15,6 +15,7 @@ env/
 #Базы данных (если локальные и не нужны в Git)
 *.db
 *.sqlite3
+compliments.json
 
 #Логи
 *.log
