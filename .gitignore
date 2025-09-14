@@ -36,3 +36,4 @@ package-lock.json
 #Служебное
 .DS_Store
 Thumbs.db
+compliments.json
