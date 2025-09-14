@@ -30,19 +30,21 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/bootstrap-toast.js') }}"></script>
-<script src="{{ url_for('static', filename='js/letters.js') }}"></script>
-<script>
-  // Передаем flash сообщения в JavaScript
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      const flashMessages = [
-        {% for message in messages %}
-          "{{ message|safe }}"{% if not loop.last %},{% endif %}
-        {% endfor %}
-      ];
-      showFlashMessages(flashMessages);
-    {% endif %}
-  {% endwith %}
-</script>
+{% if not letters_page %}
+  <script src="{{ url_for('static', filename='js/bootstrap-toast.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/letters.js') }}"></script>
+  <script>
+    // Передаем flash сообщения в JavaScript
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        const flashMessages = [
+          {% for message in messages %}
+            "{{ message|safe }}"{% if not loop.last %},{% endif %}
+          {% endfor %}
+        ];
+        showFlashMessages(flashMessages);
+      {% endif %}
+    {% endwith %}
+  </script>
+  {% endblock %}
 {% endblock %}

@@ -260,7 +260,7 @@ def get_compliment():
     shown_compliments.add(compliment)
     return jsonify({"compliment": compliment})
 
-@app.route("auth/register", methods=["GET", "POST"])
+@app.route("/auth/register", methods=["GET", "POST"])
 def auth_register():
     if request.method == "POST":
         username = (request.form.get("username") or "").strip().lower()
@@ -268,6 +268,30 @@ def auth_register():
         password = request.form.get("password") or ""
         password2 = request.form.get(password2) or ""
 
+        if not username or not email or not password:
+            flash("надо все заполнить", "warning")
+            return redirect(url_for("auth_register"))
+        
+        if password != password2:
+            flash("пароли не совпадают")
+
+        try:
+            create_user(username, email, password)
+            flash("зарегал, можешь входить", "sucess")
+            return redirect(url_for("auth_login"))
+        except sqlite3.IntegrityError:
+            flash("такой email уже зареган", "danger")
+            return redirect(url_for("auth_register"))
+        except Exception as e:
+            try:
+                get_db().rollback()
+            except Exception:
+                pass
+            flash("ошибка регистрации", "danger")
+            print(f"Регистрация: {e}")
+            return redirect(url_for("auth_register"))
+        
+    return render_template('auth_register.html')
 
 @app.route('/db_permission_check')
 def db_permission_check():
