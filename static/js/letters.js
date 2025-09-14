@@ -1,12 +1,10 @@
-"use strict";
-// // letters.ts
-// declare var bootstrap: any;
+// "use strict";
 // /**
 //  * Показывает toast уведомление с заданным сообщением
 //  * @param message - текст сообщения для отображения
 //  * @param type - тип уведомления (success, error, info, warning)
 //  */
-// function showToast(message: string, type: string = 'info'): void {
+// function showToast(message, type = 'info') {
 //     const toastElement = document.getElementById('flashToast');
 //     const toastBody = document.getElementById('toastMessage');
 //     if (!toastElement || !toastBody) {
@@ -41,7 +39,7 @@
 //  * Показывает массив flash сообщений
 //  * @param messages - массив сообщений для отображения
 //  */
-// function showFlashMessages(messages: string[]): void {
+// function showFlashMessages(messages) {
 //     messages.forEach((message, index) => {
 //         // Показываем сообщения с небольшой задержкой, если их несколько
 //         setTimeout(() => {
@@ -49,9 +47,11 @@
 //             let type = 'info';
 //             if (message.includes('Успешно') || message.includes('успешно')) {
 //                 type = 'success';
-//             } else if (message.includes('Ошибка') || message.includes('ошибка')) {
+//             }
+//             else if (message.includes('Ошибка') || message.includes('ошибка')) {
 //                 type = 'error';
-//             } else if (message.includes('Введи') || message.includes('введи')) {
+//             }
+//             else if (message.includes('Введи') || message.includes('введи')) {
 //                 type = 'warning';
 //             }
 //             showToast(message, type);
@@ -59,5 +59,5 @@
 //     });
 // }
 // // Экспортируем функции для использования в HTML
-// (window as any).showToast = showToast;
-// (window as any).showFlashMessages = showFlashMessages;
+// window.showToast = showToast;
+// window.showFlashMessages = showFlashMessages;
