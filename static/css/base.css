@@ -158,9 +158,9 @@ html, body {
   width: var(--bs-toast-max-width);
   max-width: 100%;
   font-size: var(--bs-toast-font-size);
-  color: var(--bs-toast-color);
+  color: var(--bs-toast-color, #000);
   pointer-events: auto;
-  background-color: var(--bs-toast-bg);
+  background-color: var(--bs-toast-bg, #fff);
   background-clip: padding-box;
   border: var(--bs-toast-border-width) solid var(--bs-toast-border-color);
   box-shadow: var(--bs-toast-box-shadow);

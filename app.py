@@ -136,28 +136,31 @@ def stored_letters():
 @app.route("/letters", methods=['POST', 'GET'])
 def letters():
     if request.method == 'POST':
-        title = request.form.get('title')
-        text = request.form.get('text')
+        title = request.form.get('title') or ""
+        text = request.form.get('text') or ""
         
         if text:
             db = get_db()
             try:
+                print("DEBUG:", repr(title), type(title))
+                print("DEBUG:", repr(text), type(text))
+                print("DEBUG:", repr(current_author_name), type(current_author_name))
                 db.execute(
                     "INSERT INTO letters (title, text, author) VALUES (?, ?, ?)",
-                    (title, text, current_author_name)
+                    (title, text, current_author_name())
                 )
                 db.commit()
-                flash('Успешно отправлено')
+                flash('Успешно отправлено', 'succes')
                     
             except Exception as e:
                 try:
                     db.rollback()
                 except Exception:
                     pass
-                flash('Ошибка при сохранении в базу данных')
+                flash('Ошибка при сохранении в базу данных', 'danger')
                 print(f"Ошибка базы данных: {e}")
         else:
-            flash('Введи текст пж')
+            flash('Введи текст пж', "warning")
         
         return redirect('/letters')
     else:
@@ -171,7 +174,7 @@ def photos():
         desc = request.form.get('desc')
         
         if not (file and file.filename):
-            flash('выбери файл')
+            flash('выбери файл', 'warning')
             return redirect('/photos')
 
         
@@ -179,7 +182,7 @@ def photos():
         try:
             Image.open(BytesIO(img_data)).verify()
         except Exception as img_err:
-            flash('это не картинка')
+            flash('это не картинка', 'warning')
             print(f"Ошибка обработки изображения: {img_err}")
             return redirect('/photos')
         
@@ -188,16 +191,16 @@ def photos():
         try:
             db.execute(
                 "INSERT INTO photos (name, img_data, author, desc) VALUES (?, ?, ?, ?)",
-                (name, sqlite3.Binary(img_data), current_author_name, desc)
+                (name, sqlite3.Binary(img_data), current_author_name(), desc)
             )
             db.commit()
-            flash('Успешно отправлено')
+            flash('Успешно отправлено', 'succes')
         except Exception as e:
             try:
                 db.rollback()
             except Exception:
                 pass
-            flash('Ошибка при сохранении в базу данных')
+            flash('Ошибка при сохранении в базу данных', 'danger')
             print(f"Ошибка базы данных: {e}")
         
         return redirect('/photos')
@@ -273,7 +276,7 @@ def auth_register():
             return redirect(url_for("auth_register"))
         
         if password != password2:
-            flash("пароли не совпадают")
+            flash("пароли не совпадают", 'warning')
 
         try:
             create_user(username, email, password)

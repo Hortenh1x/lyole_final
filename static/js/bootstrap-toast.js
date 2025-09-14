@@ -1,5 +1,5 @@
-// Минимальная реализация Bootstrap Toast на TypeScript
-// Извлечено из Bootstrap 5.3.0
+console.log("bootstrap-toast.js подключился!");
+
 // Утилита для работы с событиями
 const EventHandler = {
     on(element, event, handler) {
@@ -13,7 +13,8 @@ const EventHandler = {
         element.dispatchEvent(evt);
     }
 };
-// Класс Toast
+
+// Класс Toast (твой самописный)
 class Toast {
     constructor(element, config = {}) {
         this._timeout = null;
@@ -24,18 +25,20 @@ class Toast {
         this._config = {
             animation: true,
             autohide: true,
-            delay: 5000,
+            delay: 4000,
             ...config
         };
         this._init();
     }
+
     _init() {
-        // Добавляем обработчики событий
+        // кнопка закрытия
         const closeBtn = this._element.querySelector('.btn-close');
         if (closeBtn) {
             EventHandler.on(closeBtn, 'click', () => this.hide());
         }
-        // Останавливаем автоскрытие при наведении
+
+        // стоп таймера при наведении
         EventHandler.on(this._element, 'mouseenter', () => {
             this._hasMouseInteraction = true;
             this._clearTimeout();
@@ -44,7 +47,8 @@ class Toast {
             this._hasMouseInteraction = false;
             this._setTimeout();
         });
-        // Останавливаем автоскрытие при фокусе
+
+        // стоп таймера при фокусе
         EventHandler.on(this._element, 'focusin', () => {
             this._hasKeyboardInteraction = true;
             this._clearTimeout();
@@ -54,63 +58,67 @@ class Toast {
             this._setTimeout();
         });
     }
+
     show() {
-        if (this._isShown) {
-            return;
-        }
+        if (this._isShown) return;
         EventHandler.trigger(this._element, 'show.bs.toast');
-        this._element.classList.remove('hide');
-        this._element.classList.add('show');
+        this._element.classList.remove('hide', 'fade');
+        this._element.classList.add('show', 'fade');
         this._isShown = true;
-        if (this._config.animation) {
-            this._element.classList.add('fade');
-        }
         EventHandler.trigger(this._element, 'shown.bs.toast');
         if (this._config.autohide) {
             this._setTimeout();
         }
     }
+
     hide() {
-        if (!this._isShown) {
-            return;
-        }
+        if (!this._isShown) return;
         EventHandler.trigger(this._element, 'hide.bs.toast');
         this._element.classList.remove('show');
         this._isShown = false;
-        // Если есть анимация, ждем её завершения
         if (this._config.animation) {
             setTimeout(() => {
-                this._element.style.display = 'none';
+                this._element.remove();
                 EventHandler.trigger(this._element, 'hidden.bs.toast');
             }, 150);
-        }
-        else {
-            this._element.style.display = 'none';
+        } else {
+            this._element.remove();
             EventHandler.trigger(this._element, 'hidden.bs.toast');
         }
     }
+
     _setTimeout() {
         this._clearTimeout();
         if (this._config.autohide && !this._hasMouseInteraction && !this._hasKeyboardInteraction) {
-            this._timeout = window.setTimeout(() => {
-                this.hide();
-            }, this._config.delay);
+            this._timeout = window.setTimeout(() => this.hide(), this._config.delay);
         }
     }
+
     _clearTimeout() {
         if (this._timeout) {
             clearTimeout(this._timeout);
             this._timeout = null;
         }
     }
-    dispose() {
-        this._clearTimeout();
-        this._element = null;
-        this._config = null;
-    }
 }
-// Экспортируем в глобальную область
+
+// Когда страница загружена — ищем все .toast и показываем их
+document.addEventListener("DOMContentLoaded", () => {
+    const toastElList = document.querySelectorAll('.toast');
+
+    if (!toastElList.length) {
+        return; // нет сообщений
+    }
+
+    toastElList.forEach(toastEl => {
+        const toast = new Toast(toastEl, {
+            autohide: true,
+            delay: 4000
+        });
+        toast.show();
+    });
+});
+
+// Экспортируем в глобал (чтобы при желании можно было вызвать вручную)
 window.bootstrap = window.bootstrap || {};
 window.bootstrap.Toast = Toast;
-// Экспорт для модулей
-export { Toast };
