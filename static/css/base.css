@@ -278,17 +278,17 @@ html, body {
 
 /* Цветовые схемы для разных типов уведомлений */
 .toast.bg-success {
-  --bs-toast-bg: #d1e7dd;
-  --bs-toast-border-color: #badbcc;
-  --bs-toast-header-bg: #d1e7dd;
-  --bs-toast-header-border-color: #badbcc;
+  --bs-toast-bg: #5dedac;
+  --bs-toast-border-color: #1c3228;
+  --bs-toast-header-bg: #5dedac;
+  --bs-toast-header-border-color: #1c3228;
 }
 
 .toast.bg-success.text-white {
   --bs-toast-bg: #198754;
-  --bs-toast-color: #fff;
+  --bs-toast-color: #5dedac;
   --bs-toast-header-bg: #198754;
-  --bs-toast-header-color: #fff;
+  --bs-toast-header-color: #5dedac;
   --bs-btn-close-white-filter: invert(1) grayscale(100%) brightness(200%);
 }
 

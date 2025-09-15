@@ -12,7 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = 'key'
 
-ROLES = ("user", "moderator", "admin")
+ROLES = ("user", "admin", "owner")
 DEFAULT_ROLE = "user"
 
 DB_DIR = os.path.join(os.path.dirname(__file__), 'instance')
@@ -52,6 +52,27 @@ def create_user(username: str, email: str, password: str, role: str = DEFAULT_RO
         (username, email, password_hash, role)
     )
     db.commit()
+
+def is_admin():
+    return g.user and g.user["role"] == "admin"
+
+def login_required(view):
+    @wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            flash("надо залогиниться", "warning")
+            return redirect(url_for("auth_login"))
+        return view(**kwargs)
+    return wrapped_view
+
+def admin_required(view):
+    @wraps(view)
+    def wrapped_view(**kwargs):
+        if not is_admin():
+            flash("Доступ запрещён", "danger")
+            return redirect(url_for("index"))
+        return view(**kwargs)
+    return wrapped_view
 
 @app.before_request
 def load_current_user():
@@ -146,6 +167,7 @@ def stored_letters():
 
 
 @app.route("/letters", methods=['POST', 'GET'])
+@login_required
 def letters():
     if request.method == 'POST':
         title = request.form.get('title') or ""
@@ -180,6 +202,7 @@ def letters():
     
 
 @app.route("/photos", methods=['POST', 'GET'])
+@login_required
 def photos():
     if request.method == 'POST':
         file = request.files.get('img_data')
