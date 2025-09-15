@@ -48,7 +48,7 @@ def create_user(username: str, email: str, password: str, role: str = DEFAULT_RO
     email = (email or "").strip().lower()
     password_hash = generate_password_hash(password)
     db.execute(
-        "INSSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)",
+        "INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)",
         (username, email, password_hash, role)
     )
     db.commit()
@@ -57,6 +57,18 @@ def create_user(username: str, email: str, password: str, role: str = DEFAULT_RO
 def load_current_user():
     user_id = session.get("user_id")
     g.user = get_user_by_id(user_id) if user_id else None
+
+@app.before_request
+def load_logged_in_user():
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = get_db().execute(
+            "SELECT * FROM users WHERE id = ?",
+            (user_id,)
+        ).fetchone()
 
 def current_author_name() -> str:
     return g.user['username'] if g.user else 'Anonymous'    
@@ -269,7 +281,7 @@ def auth_register():
         username = (request.form.get("username") or "").strip().lower()
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
-        password2 = request.form.get(password2) or ""
+        password2 = request.form.get("password2") or ""
 
         if not username or not email or not password:
             flash("надо все заполнить", "warning")
@@ -295,6 +307,40 @@ def auth_register():
             return redirect(url_for("auth_register"))
         
     return render_template('auth_register.html')
+
+@app.route('/auth/login', methods=["GET", "POST"])
+def auth_login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        db = get_db()
+        user = db.execute(
+            "SELECT * FROM users WHERE USERNAME = ?",
+            (username,)
+        ).fetchone()
+
+        if user is None:
+            flash("Пользователь не найден", "danger")
+            return redirect(url_for("auth_login"))
+        
+        if not check_password_hash(user["password_hash"], password):
+            flash("Неверный пароль", "danger")
+            return redirect(url_for("auth_login"))
+        
+        #если вошел
+        session.clear()
+        session["user_id"] = user['id']
+        flash("Вход в аккаунт " + user["username"] + " выполнен", "succes")
+        return redirect(url_for("index"))
+    
+    return render_template("auth_login.html")
+
+@app.route("/auth/logout")
+def auth_logout():
+    session.clear()
+    flash("Вы вышли из аккаунта", "info")
+    return redirect(url_for("index"))
 
 @app.route('/db_permission_check')
 def db_permission_check():

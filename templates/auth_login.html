@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block header %}
+<h1>Вход</h1>
+{% endblock %}
+
+{% block content %}
+<form method="post" class="form-control">
+    <input type="text" name="username" placeholder="Логин" class="form-control"><br>
+    <input type="password" name="password" placeholder="Пароль" class="form-control"><br>
+    <button class="btn btn-primary" type="submit">Войти</button>
+    <a href="{{ url_for('auth_register') }}" class="nav-link">Регистрация</a>
+</form>
+{% endblock %}

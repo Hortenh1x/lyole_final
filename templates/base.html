@@ -55,6 +55,13 @@
                 <li><a href="{{ url_for('letters') }}" class="nav-link px-2 link-dark">Добавить запись</a></li>
                 <li><a href="{{ url_for('mood') }}" class="nav-link px-2 link-dark">Mood</a></li>
                 <li><a href="{{ url_for('photos') }}" class="nav-link px-2 link-dark">Загрузить фото</a></li>
+
+                {% if g.user %}
+                    <li><a href="{{ url_for('auth_logout') }}" class="nav-link px-2 link-dark">Выйти ({{ g.user['username'] }})</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('auth_login') }}" class="nav-link px-2 link-dark">Вход</a></li>
+                    <li><a href="{{ url_for('auth_register') }}" class="nav-link px-2 link-dark">Регистрация</a></li>
+                {% endif %}
             </ul>
         </header>
 
