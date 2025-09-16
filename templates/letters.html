@@ -10,9 +10,9 @@
 
 {% block content %}
 <form method="post" class="form-control">
-    <input type="text" name="title" placeholder="Заголовок" class="form-control"><br>
-    <input type="text" name="text" placeholder="Текст письма" class="form-control"><br>
-    <button class ="btn btn-success" type="submit">Добавить</button>
-    <a href="{{ url_for('stored_letters') }}" class="nav-link px-2 link-dark">Сохраненные письма</a>
+    <input type="text" name="title" placeholder="Headline" class="form-control"><br>
+    <input type="text" name="text" placeholder="Text" class="form-control"><br>
+    <button class ="btn btn-success" type="submit">Submit</button>
+    <a href="{{ url_for('stored_letters') }}" class="nav-link px-2 link-dark">Saved letters</a>
 </form>
 {% endblock %}

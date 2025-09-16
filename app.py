@@ -60,7 +60,7 @@ def login_required(view):
     @wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            flash("надо залогиниться", "warning")
+            flash("Login required", "warning")
             return redirect(url_for("auth_login"))
         return view(**kwargs)
     return wrapped_view
@@ -69,7 +69,7 @@ def admin_required(view):
     @wraps(view)
     def wrapped_view(**kwargs):
         if not is_admin():
-            flash("Доступ запрещён", "danger")
+            flash("Acces denied", "danger")
             return redirect(url_for("index"))
         return view(**kwargs)
     return wrapped_view
@@ -146,7 +146,7 @@ init_db()
 with open("compliments.json", encoding="utf-8") as f:
     data = f.read().strip()
     if not data:
-        raise ValueError("Файл compliments.json пуст")
+        raise ValueError("File compliments.json is empty")
     compliments = json.loads(data)
 
 shown_compliments = set()
@@ -184,17 +184,17 @@ def letters():
                     (title, text, current_author_name())
                 )
                 db.commit()
-                flash('Успешно отправлено', 'succes')
+                flash('Uploaded succesfuly', 'succes')
                     
             except Exception as e:
                 try:
                     db.rollback()
                 except Exception:
                     pass
-                flash('Ошибка при сохранении в базу данных', 'danger')
-                print(f"Ошибка базы данных: {e}")
+                flash('Error saving to database', 'danger')
+                print(f"Database error: {e}")
         else:
-            flash('Введи текст пж', "warning")
+            flash('Enter text', "warning")
         
         return redirect('/letters')
     else:
@@ -209,7 +209,7 @@ def photos():
         desc = request.form.get('desc')
         
         if not (file and file.filename):
-            flash('выбери файл', 'warning')
+            flash('Choose a file to upload', 'warning')
             return redirect('/photos')
 
         
@@ -217,8 +217,8 @@ def photos():
         try:
             Image.open(BytesIO(img_data)).verify()
         except Exception as img_err:
-            flash('это не картинка', 'warning')
-            print(f"Ошибка обработки изображения: {img_err}")
+            flash('The file is not an image', 'warning')
+            print(f"Image processing error: {img_err}")
             return redirect('/photos')
         
         name = file.filename
@@ -229,14 +229,14 @@ def photos():
                 (name, sqlite3.Binary(img_data), current_author_name(), desc)
             )
             db.commit()
-            flash('Успешно отправлено', 'succes')
+            flash('Uploaded succesfuly', 'succes')
         except Exception as e:
             try:
                 db.rollback()
             except Exception:
                 pass
-            flash('Ошибка при сохранении в базу данных', 'danger')
-            print(f"Ошибка базы данных: {e}")
+            flash('Error saving to database', 'danger')
+            print(f"Database error: {e}")
         
         return redirect('/photos')
     
@@ -307,26 +307,26 @@ def auth_register():
         password2 = request.form.get("password2") or ""
 
         if not username or not email or not password:
-            flash("надо все заполнить", "warning")
+            flash("All fields need to be filled", "warning")
             return redirect(url_for("auth_register"))
         
         if password != password2:
-            flash("пароли не совпадают", 'warning')
+            flash("Passwords do not match", 'warning')
 
         try:
             create_user(username, email, password)
-            flash("зарегал, можешь входить", "sucess")
+            flash("Account registred succesfuly", "sucess")
             return redirect(url_for("auth_login"))
         except sqlite3.IntegrityError:
-            flash("такой email уже зареган", "danger")
+            flash("This email already exists", "danger")
             return redirect(url_for("auth_register"))
         except Exception as e:
             try:
                 get_db().rollback()
             except Exception:
                 pass
-            flash("ошибка регистрации", "danger")
-            print(f"Регистрация: {e}")
+            flash("Registration error", "danger")
+            print(f"Registration: {e}")
             return redirect(url_for("auth_register"))
         
     return render_template('auth_register.html')
@@ -344,17 +344,17 @@ def auth_login():
         ).fetchone()
 
         if user is None:
-            flash("Пользователь не найден", "danger")
+            flash("User not found", "danger")
             return redirect(url_for("auth_login"))
         
         if not check_password_hash(user["password_hash"], password):
-            flash("Неверный пароль", "danger")
+            flash("Wrong password", "danger")
             return redirect(url_for("auth_login"))
         
         #если вошел
         session.clear()
         session["user_id"] = user['id']
-        flash("Вход в аккаунт " + user["username"] + " выполнен", "succes")
+        flash("Login into account " + user["username"] + " completed", "succes")
         return redirect(url_for("index"))
     
     return render_template("auth_login.html")
@@ -362,7 +362,7 @@ def auth_login():
 @app.route("/auth/logout")
 def auth_logout():
     session.clear()
-    flash("Вы вышли из аккаунта", "info")
+    flash("You logged out", "info")
     return redirect(url_for("index"))
 
 @app.route('/db_permission_check')

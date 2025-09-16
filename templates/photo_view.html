@@ -16,10 +16,10 @@
     {% if photo.desc %}
         <p style="font-size: 1.2em;">{{ photo.desc }}</p>
     {% else %}
-        <p><em>Без описания</em></p>
+        <p><em>No description</em></p>
     {% endif %}
 
-    <p><em>Автор: {{ photo.author }}</em></p>
-    <a href="{{ url_for('stored_photos') }}">← Назад к архиву</a>
+    <p><em>Author: {{ photo.author }}</em></p>
+    <a href="{{ url_for('stored_photos') }}">← Back to archive</a>
 </div>
 {% endblock %}

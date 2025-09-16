@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Загрузить фото
+Upload photo
 {% endblock %}
 
 {% block header %}
-<h1>Загрузить фото</h1>
+<h1>Upload photo</h1>
 {% endblock %}
 
 {% block content %}
@@ -13,9 +13,9 @@
     <div class="form-group">
         <input class="form-control" name="img_data" placeholder="Picture" type="file" accept="image/*">
     </div>
-    <input type="text" name="desc" placeholder="Описание" class="form-control"><br>
+    <input type="text" name="desc" placeholder="Description" class="form-control"><br>
     <button class="btn btn-success" type="submit">Submit</button>
-    <a href="{{ url_for('stored_photos') }}" class="nav-link px-2 link-dark">Архив</a>
+    <a href="{{ url_for('stored_photos') }}" class="nav-link px-2 link-dark">Archive</a>
 </form>
 
 {% endblock %}

@@ -8,10 +8,10 @@
 
 {% block content %}
     <form method="post" action="{{ url_for('auth_register') }}" class="form-block" style="max-width: 420px; width: 100%;">
-        <input id="username" name="username" type="text" placeholder="Логин" required class="form-control" autocomplete="username"><br>
+        <input id="username" name="username" type="text" placeholder="Username" required class="form-control" autocomplete="username"><br>
         <input id="email" name="email" type="email" placeholder="Email" required class="form-control" autocomplete="email"><br>
-        <input id="password" name="password" type="password" placeholder="Пароль" required class="form-control" autocomplete="new-password"><br>
-        <input id="password2" name="password2" type="password" placeholder="Повтори пароль" required class="form-control" autocomplete="new-password"><br>
+        <input id="password" name="password" type="password" placeholder="Password" required class="form-control" autocomplete="new-password"><br>
+        <input id="password2" name="password2" type="password" placeholder="Repeat password" required class="form-control" autocomplete="new-password"><br>
         <button class="btn btn-success" type="submit">Зарегистрироваться</button>
     </from>
 {% endblock %}
