@@ -165,6 +165,20 @@ def stored_letters():
         ).fetchall()
     return render_template('stored_letters.html', stored_letters=rows)
 
+@app.route("/letters/stored/delete/letter/<int:letter_id>")
+@admin_required
+def delete_letter(letter_id):
+    db = get_db()
+    db.execute("DELETE FROM letters WHERE id = ?", (letter_id,))
+    db.commit()
+    flash("Letter deleted", "warning")
+    return redirect(url_for("stored_letters"))
+
+@app.route("/letters/stored/edit/letter/<int:letter_id>")
+@admin_required
+def edit_letter(letter_id):
+    return True
+
 
 @app.route("/letters", methods=['POST', 'GET'])
 @login_required
@@ -184,7 +198,7 @@ def letters():
                     (title, text, current_author_name())
                 )
                 db.commit()
-                flash('Uploaded succesfuly', 'succes')
+                flash('Uploaded succesfuly', 'success')
                     
             except Exception as e:
                 try:
@@ -229,7 +243,7 @@ def photos():
                 (name, sqlite3.Binary(img_data), current_author_name(), desc)
             )
             db.commit()
-            flash('Uploaded succesfuly', 'succes')
+            flash('Uploaded succesfuly', 'success')
         except Exception as e:
             try:
                 db.rollback()
@@ -315,7 +329,7 @@ def auth_register():
 
         try:
             create_user(username, email, password)
-            flash("Account registred succesfuly", "sucess")
+            flash("Account registred succesfuly", "success")
             return redirect(url_for("auth_login"))
         except sqlite3.IntegrityError:
             flash("This email already exists", "danger")
@@ -354,7 +368,7 @@ def auth_login():
         #если вошел
         session.clear()
         session["user_id"] = user['id']
-        flash("Login into account " + user["username"] + " completed", "succes")
+        flash("Login into account " + user["username"] + " completed", "success")
         return redirect(url_for("index"))
     
     return render_template("auth_login.html")
@@ -371,6 +385,47 @@ def db_permission_check():
     can_read = os.access(db_path, os.R_OK)
     can_write = os.access(db_path, os.W_OK)
     return jsonify({"can_read": can_read, "can_write": can_write})
+
+@app.route('/admin_panel')
+def admin_panel():
+    db = get_db()
+    users = db.execute("SELECT id, username, email, role FROM users").fetchall()
+    return render_template("admin_panel.html", users=users)
+
+@app.route("/admin/promote/<int:user_id>")
+@admin_required
+def promote_user(user_id):
+    db = get_db()
+    db.execute("UPDATE users SET role = 'admin' WHERE id = ?", (user_id,))
+    db.commit()
+    flash("User promoted to admin", "success")
+    return redirect(url_for("admin_panel"))
+
+@app.route("/admin/demote/<int:user_id>")
+@admin_required
+def demote_user(user_id):
+    db = get_db()
+    db.execute("UPDATE users SET role = 'user' WHERE id = ?", (user_id,))
+    if user_id == 1:
+        flash("You cannot demote the owner", "danger")
+        return redirect(url_for("admin_panel"))
+    else:
+        db.commit()
+        flash("User demoted to regular user", "success")
+        return redirect(url_for("admin_panel"))
+
+@app.route("/admin/delete/<int:user_id>")
+@admin_required
+def delete_user(user_id):
+    db = get_db()
+    db.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    if user_id == 1:
+        flash("You cannot delete the owner", "danger")
+        return redirect(url_for("admin_panel"))
+    else:
+        db.commit()
+        flash("User demoted to regular user", "success")
+        return redirect(url_for("admin_panel"))
 
 
 @app.route('/whoami')

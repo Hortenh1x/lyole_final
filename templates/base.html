@@ -53,14 +53,17 @@
             <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
                 <li><a href="{{ url_for('index') }}" class="nav-link px-2 link-dark">Main page</a></li>
                 <li><a href="{{ url_for('letters') }}" class="nav-link px-2 link-dark">Add post</a></li>
-                <li><a href="{{ url_for('mood') }}" class="nav-link px-2 link-dark">Mood</a></li>
                 <li><a href="{{ url_for('photos') }}" class="nav-link px-2 link-dark">Upload photo</a></li>
 
                 {% if g.user %}
                     <li><a href="{{ url_for('auth_logout') }}" class="nav-link px-2 link-dark">Logout ({{ g.user['username'] }})</a></li>
                     {% if g.user['role'] == 'admin' %}
                         <li><a href="{{ url_for('admin_panel') }}" class="nav-link">Admin panel</a></li>
+                        <li><a href="{{ url_for('mood') }}" class="nav-link px-2 link-dark">Mood</a></li>
                     {% endif %}
+                    {% if g.user['role'] == 'user' %}
+                        <li><p>You are regular user</p></li>
+                    {%endif%}
                 {% else %}
                     <li><a href="{{ url_for('auth_login') }}" class="nav-link px-2 link-dark">Login</a></li>
                     <li><a href="{{ url_for('auth_register') }}" class="nav-link px-2 link-dark">Register</a></li>

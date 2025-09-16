@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Admin panel{% endblock %}
+
+{% block header %}
+<h1>Admin panel</h1>
+{% endblock %}
+
+{% block content %}
+<h2>Users</h2>
+<table class="table table-bordered align-middle admin-table">
+  <thead class="table-light">
+    <tr>
+      <th style="width: 50px;">ID</th>
+      <th style="width: 200px;">Username</th>
+      <th style="width: 250px;">Email</th>
+      <th style="width: 100px;">Role</th>
+      <th style="width: 200px;">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>{{ user.username }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.role }}</td>
+      <td>
+        <a href="{{ url_for('promote_user', user_id=user.id) }}" class="btn btn-sm btn-success">Make admin</a>
+        <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-sm btn-danger">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -13,7 +13,19 @@ Saved posts
 <div class="row">
     {% for new_letter in stored_letters %}
     <div class="col-md-6 item">
-      <div class="item-in">
+      <div class="item-in position-relative">
+        <!-- Кнопка ⋮ с меню -->
+        <div class="dropdown position-absolute top-0 end-0 m-2">
+          <button class="btn btn-sm btn-light" type="button" id="dropdownMenu{{ new_letter.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+            &#x22EE; <!-- символ ⋮ -->
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu{{ new_letter.id }}">
+            <!-- <li><a class="dropdown-item" href="{{ url_for('edit_letter', letter_id=new_letter.id) }}">Edit</a></li> -->
+            <li><a class="dropdown-item text-danger" href="{{ url_for('delete_letter', letter_id=new_letter.id) }}">Delete</a></li>
+          </ul>
+        </div>
+
+        <!-- Контент письма -->
         <h4>{{ new_letter.title }}</h4>
         <div class="seperator"></div>
         <p>{{ new_letter.text }}</p>
@@ -24,4 +36,5 @@ Saved posts
     </div>
     {% endfor %}
 </div>
+
 {% endblock %}
