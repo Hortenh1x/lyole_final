@@ -406,8 +406,10 @@ def promote_user(user_id):
 def demote_user(user_id):
     db = get_db()
     db.execute("UPDATE users SET role = 'user' WHERE id = ?", (user_id,))
-    if user_id == 1:
-        flash("You cannot demote the owner", "danger")
+    if user_id == session.get("user_id"):
+        flash("You cannot demote yourself", "danger")
+        if user_id == 1:
+            flash("You cannot demote the owner", "danger")
         return redirect(url_for("admin_panel"))
     else:
         db.commit()
@@ -418,15 +420,18 @@ def demote_user(user_id):
 @admin_required
 def delete_user(user_id):
     db = get_db()
-    db.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    
+    if user_id == session.get("user_id"):
+        flash("You cannot delete yourself", "danger")
+        return redirect(url_for("admin_panel"))
     if user_id == 1:
         flash("You cannot delete the owner", "danger")
         return redirect(url_for("admin_panel"))
-    else:
-        db.commit()
-        flash("User demoted to regular user", "success")
-        return redirect(url_for("admin_panel"))
-
+    
+    db.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    db.commit()
+    flash("User deleted successfuly", "success")
+    return redirect(url_for("admin_panel"))
 
 @app.route('/whoami')
 def whoami():
